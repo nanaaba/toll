@@ -120,7 +120,15 @@ $app->get('/api/transactions', function (Request $request, Response $response) {
                     ->write(json_encode($dataresponse));
 });
 
+ $app->get('/setup', function (Request $request, Response $response) {
 
+        $imei = $request->getHeaderLine('imei');
+
+        $dataresponse = setup($imei);
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
 
 
 
@@ -315,15 +323,7 @@ $app->group('/api', function () use ($app) {
 //***********************************************end user apis **************************************************
 //***********************************************begin mobile apis **************************************************
 
-    $app->get('/setup', function (Request $request, Response $response) {
-
-        $imei = $request->getHeaderLine('imei');
-
-        $dataresponse = setup($imei);
-
-        return $response->withHeader('Content-Type', 'application/json')
-                        ->write(json_encode($dataresponse));
-    });
+   
 
 
 
