@@ -125,7 +125,8 @@ function registerPos($imei) {
 
     $queryset = ORM::for_table('devices')->create();
 
-    $queryset->devicecode = rand(0, 100);
+   
+    $queryset->devicecode =  str_pad(rand(0, 1000), 10,0);
     $queryset->imei = $imei;
     $queryset->save();
 

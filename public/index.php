@@ -120,7 +120,7 @@ $app->get('/api/transactions', function (Request $request, Response $response) {
                     ->write(json_encode($dataresponse));
 });
 
- $app->get('/setup', function (Request $request, Response $response) {
+ $app->get('/api/setup', function (Request $request, Response $response) {
 
         $imei = $request->getHeaderLine('imei');
 
