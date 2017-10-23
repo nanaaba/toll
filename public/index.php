@@ -16,6 +16,7 @@ $config['addContentLengthHeader'] = false;
 
 $app = new \Slim\App($config);
 
+
 $authenticator = function ($request, $response, $next) {
 
     if ($request->hasHeader('token')) {
@@ -48,6 +49,9 @@ $authenticator = function ($request, $response, $next) {
 
 
 //toll apis
+// Notice we pass along that $mailer we created in index.php
+
+
 
 $app->get('/', function ( Request $request, Response $response) {
 
@@ -59,12 +63,12 @@ $app->get('/', function ( Request $request, Response $response) {
 $app->post('/api/authenticate', function (Request $request, Response $response, $args) {
     $dataArray = getRequestParsedBody($request);
 
-  // print_r($dataArray) ;
-   $dataresponse = authenticateuser($dataArray);
-   
+    // print_r($dataArray) ;
+    $dataresponse = authenticateuser($dataArray);
+
 //
- return $response->withHeader('Content-Type', 'application/json')
-                  ->write(json_encode($dataresponse));
+    return $response->withHeader('Content-Type', 'application/json')
+                    ->write(json_encode($dataresponse));
 });
 
 
@@ -120,15 +124,15 @@ $app->get('/api/transactions', function (Request $request, Response $response) {
                     ->write(json_encode($dataresponse));
 });
 
- $app->get('/api/setup', function (Request $request, Response $response) {
+$app->get('/api/setup', function (Request $request, Response $response) {
 
-        $imei = $request->getHeaderLine('imei');
+    $imei = $request->getHeaderLine('imei');
 
-        $dataresponse = setup($imei);
+    $dataresponse = setup($imei);
 
-        return $response->withHeader('Content-Type', 'application/json')
-                        ->write(json_encode($dataresponse));
-    });
+    return $response->withHeader('Content-Type', 'application/json')
+                    ->write(json_encode($dataresponse));
+});
 
 
 
@@ -322,12 +326,6 @@ $app->group('/api', function () use ($app) {
 
 //***********************************************end user apis **************************************************
 //***********************************************begin mobile apis **************************************************
-
-   
-
-
-
-
 //***********************************************end mobile apis **************************************************
 //***********************************************begin report apis **************************************************
 
@@ -410,6 +408,92 @@ $app->group('/api', function () use ($app) {
                         ->write(json_encode($dataArray));
     });
 
+
+    $app->get('/performingcashiers', function (Request $request, Response $response) {
+
+        $dataArray = reportforPerformingCashiersAcrossCountry();
+       
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+
+     $app->get('/nonperformingcashiers', function (Request $request, Response $response) {
+
+        $dataArray = reportforNonPerformingCashiersAcrossCountry();
+        
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+    
+     $app->get('/regionperformance', function (Request $request, Response $response) {
+
+        $dataArray = reportforRegionPerformance();
+       
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+    
+    
+    $app->get('/shiftperformance', function (Request $request, Response $response) {
+
+        $dataArray = reportforShiftPerformance();
+      
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+    
+     $app->get('/performingtolls', function (Request $request, Response $response) {
+
+        $dataArray = reportforPerformingTollsAcrossCountry();
+       
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+      $app->get('/nonperformingtolls', function (Request $request, Response $response) {
+
+        $dataArray = reportforNonPerformingTollsAcrossCountry();
+        
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+    
+    $app->get('/categoryperformance', function (Request $request, Response $response) {
+
+        $dataArray = reportforCategoryPerformance();
+        
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataArray));
+    });
+    
+    
+    $app->get('/weeklyreport/{type}/{value}', function (Request $request, Response $response, $args) {
+
+        $dataresponse = reportWeekly($args);
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
+    
+     $app->get('/yearlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
+
+        $dataresponse = reportyearly($args);
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
+    
+    
 //***********************************************end report apis **************************************************
 //***********************************************begin setup apis **************************************************
 

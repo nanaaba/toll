@@ -125,8 +125,8 @@ function registerPos($imei) {
 
     $queryset = ORM::for_table('devices')->create();
 
-   
-    $queryset->devicecode =  str_pad(rand(0, 1000), 10,0);
+
+    $queryset->devicecode = str_pad(rand(0, 1000), 10, 0);
     $queryset->imei = $imei;
     $queryset->save();
 
@@ -163,8 +163,8 @@ function getRegionCashiers($args) {
 }
 
 function authenticateuser($data) {
-    
-    
+
+
     $username = $data['email'];
     $password = md5($data['password']);
 
@@ -213,7 +213,6 @@ function authenticatecashier($data) {
                 'contact' => $username,
                 'password' => $password,
                 'active' => 0
-               
             ))->find_one();
 
     $name = $result->name;
@@ -420,7 +419,7 @@ function registerUser($data) {
         $queryset->role = $data['role'];
         $queryset->email = $data['email'];
         $queryset->addedby = $data['addedby'];
-         $queryset->region = $data['region'];
+        $queryset->region = $data['region'];
         $queryset->save();
 
 
@@ -567,13 +566,14 @@ function fetchDayWiseReport($data) {
     $enddate = $data['enddate'];
 
 
-    $query_build = "SELECT * FROM daywise_report_view WHERE DATE(transaction_date) BETWEEN '$startdate' AND '$enddate'";
+    $query_build = "SELECT * FROM daywise_report_view WHERE transaction_date BETWEEN '$startdate' AND '$enddate'";
 
 
     if (!empty($toll)) {
         $query_build = $query_build . " AND toll IN(" . $toll . ")";
     }
 
+    //return $query_build;
 
 
     $results = ORM::forTable()->rawQuery($query_build)->findArray();
@@ -1006,4 +1006,206 @@ function rand_code($len) {
         $CodeEX = $RandCode;
     }
     return $CodeEX;
+}
+
+//functions for reports
+
+function reportforPerformingCashiersAcrossCountry() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier_id from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by cashier_name, cashier_id 
+order by sum(amount) desc limit 10";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforNonPerformingCashiersAcrossCountry() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier_id from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by cashier_name, cashier_id 
+order by sum(amount) asc limit 10";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforRegionPerformance() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, region_name, region_id from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by region_name, region_id 
+order by sum(amount) desc ";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforShiftPerformance() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, shift from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by shift ";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforPerformingTollsAcrossCountry() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, area, toll from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by area, toll 
+order by sum(amount) desc limit 10";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforNonPerformingTollsAcrossCountry() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, area, toll from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by area, toll 
+order by sum(amount) asc limit 10";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportforCategoryPerformance() {
+
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, category_name, category from toll.transaction_view 
+WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+group by category_name, category 
+order by sum(amount) desc ";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportWeekly($data) {
+
+    $type = $data['type'];
+    $val = $data['value'];
+
+
+    $query_build = "select DAYNAME(transactiondate) as date,DAY(transactiondate) as dayno, sum(amount) as value 
+from toll.transaction_view 
+where
+DATE(transactiondate) BETWEEN 
+DATE_ADD(CURDATE(), INTERVAL(1-DAYOFWEEK(CURDATE())) DAY)
+AND CURDATE() 
+and $type = '$val' 
+ group by DAYNAME(transactiondate),DAY(transactiondate)
+ order by DAY(transactiondate) asc ";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function reportyearly($data) {
+
+    $type = $data['type'];
+    $val = $data['value'];
+
+
+    $query_build = "select MONTHNAME(transactiondate) as date, sum(amount) as value, 
+month(transactiondate) as month_no from toll.transaction_view 
+where DATE(transactiondate) 
+BETWEEN DATE_FORMAT(NOW() ,'%Y-%01-01') AND CURDATE() 
+and $type = $val 
+group by MONTHNAME(transactiondate),
+ month(transactiondate) order by month(transactiondate)";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
 }
