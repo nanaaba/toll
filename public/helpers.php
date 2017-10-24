@@ -159,7 +159,7 @@ function resetUserPassword($userid) {
     $saved = $result->save();
 
     if ($saved) {
-        $message ='Your password as been reset.Your new password is '.$password_new;
+        $message ="'Your password as been reset.Your new password is '.$password_new";
         sendemail($email, $message);
 
         $dataArray = array(
@@ -196,7 +196,7 @@ function changePassword($code, $token) {
     $saved = $results->save();
 
     if ($saved) {
-        $message = 'Your new password is ' . $code;
+        $message = "'Your new password is ' . $code";
         sendemail($email, $message);
 
         $dataArray = array(

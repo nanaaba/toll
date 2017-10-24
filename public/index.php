@@ -174,7 +174,7 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
                         ->write(json_encode($dataresponse));
     });
     
-    $app->post('/changepassword', function (Request $request, Response $response, $args) {
+    $app->get('/changepassword', function (Request $request, Response $response, $args) {
      
             $token = $request->getHeaderLine('token');
            $code = $request->getHeaderLine('code');
