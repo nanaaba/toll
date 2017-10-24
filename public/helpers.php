@@ -148,10 +148,92 @@ function checkdeviceexistence($imei) {
     return $result->devicecode;
 }
 
+function resetUserPassword($userid) {
+
+    $password_new = rand_code(12) . str_pad($userid, 8, '0', STR_PAD_LEFT);
+
+    $result = ORM::for_table('users')->where('id', $userid)->find_one();
+
+    $result->password = md5($password_new);
+    $saved = $result->save();
+
+    if ($saved) {
+
+        $dataArray = array(
+            "status" => 0,
+            "message" => "User Password Reseted.An email has been send to user email."
+        );
+
+        return $dataArray;
+    }
+}
+
+function changePassword($code, $token) {
+
+
+
+    $result = ORM::for_table('tokens')->where('token_code', $token)->find_one();
+
+    if (empty($result)) {
+
+        $dataArray = array(
+            "status" => 0,
+            "message" => "User dont have access to change password.Unauthorized Access.Kindly logout and try again."
+        );
+        return $dataArray;
+    }
+
+    $userid = $result->userid;
+
+    $results = ORM::for_table('users')->where('id', $userid)->find_one();
+
+    $results->password = md5($code);
+
+    $saved = $results->save();
+
+    if ($saved) {
+
+        $dataArray = array(
+            "status" => 0,
+            "message" => "User Password has been update.An email has been send to your email."
+        );
+
+        return $dataArray;
+    }
+}
+
 function getRegionCashiers($args) {
 
     $region_ids = $args['ids'];
     $resultset = ORM::forTable()->rawQuery('SELECT cashiers.*  FROM `cashiers` left join tollpoints on cashiers.toll= tollpoints.id WHERE tollpoints.region IN (' . $region_ids . ') AND cashiers.active=0 ')->findArray();
+
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $resultset
+    );
+    return $dataArray;
+}
+
+function getTollCashiers($args) {
+
+    $toll_ids = $args['ids'];
+    $resultset = ORM::forTable()->rawQuery('SELECT *  FROM `cashiers_view` WHERE toll IN (' . $toll_ids . ') AND active=0 ')->findArray();
+
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $resultset
+    );
+    return $dataArray;
+}
+
+function getRegionTolls($args) {
+
+    $region_ids = $args['ids'];
+    $resultset = ORM::forTable()->rawQuery('SELECT *  FROM `tollpoints_view` WHERE region IN (' . $region_ids . ') AND active=0 ')->findArray();
 
 
     $dataArray = array(
@@ -408,13 +490,14 @@ function registerUser($data) {
     $email = $data['email'];
 
     $result = checkuserexistence($email);
+    $password = rand_code(12);
 
     if ($result == 0) {
 
         $queryset = ORM::for_table('users')->create();
 
         $queryset->name = $data['name'];
-        $queryset->password = $data['password'];
+        $queryset->password = $password;
         $queryset->contact = $data['contact'];
         $queryset->role = $data['role'];
         $queryset->email = $data['email'];
@@ -422,10 +505,34 @@ function registerUser($data) {
         $queryset->region = $data['region'];
         $queryset->save();
 
+        $message = "
+<html>
+<head>
+<title>User Credentials</title>
+</head>
+<body>
+<p>You have been created as a user on Toll application.You have been assigned a role as " . $data['role'] . "
+   .Below is your use credentials .You are advised to change your password once you log into the application. </p>
+<table>
+<tr>
+<th>Email</th>
+<th>Password</th>
+</tr>
+<tr>
+<td>" . $data['email'] . "</td>
+<td>" . $password . "</td>
+</tr>
+</table>
+</body>
+</html>
+";
+
+       $feedback = sendemail($data['email'], $message);
+        
 
         $dataArray = array(
             "status" => 0,
-            "message" => "User registered successfully"
+            "message" => "User registered successfully".$feedback
         );
         return $dataArray;
     }
@@ -1208,4 +1315,204 @@ group by MONTHNAME(transactiondate),
         "data" => $results
     );
     return $dataArray;
+}
+
+function customPerformance($data) {
+
+    $reportlevel = $data['reportlevel'];
+    $cashier = $data['cashier'];
+    $region = $data['region'];
+    $toll = $data['toll'];
+    $shift = $data['shift'];
+
+    $startdate = $data['startdate'];
+    $enddate = $data['enddate'];
+
+    if ($reportlevel == 'region') {
+        return regionalLevelPerformance($shift, $startdate, $enddate);
+    }
+
+
+    if ($reportlevel == 'toll') {
+
+        return tollLevelPerformance($shift, $startdate, $enddate, $region);
+    }
+
+    if ($reportlevel == 'cashier') {
+
+        return cashierLevelPerformance($shift, $startdate, $enddate, $region, $toll);
+    }
+
+
+    if ($reportlevel == 'category') {
+
+        return categoryLevelPerformance($shift, $startdate, $enddate, $region, $toll, $cashier);
+    }
+}
+
+function regionalLevelPerformance($shift, $startdate, $enddate) {
+
+    $query_build = "select count(*) as volume, sum(amount) as value, region_name, region_id 
+from toll.transaction_view 
+WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
+
+    $query_end = "group by region_name, region_id 
+order by sum(amount) desc";
+
+
+
+
+
+
+    if (!empty($shift)) {
+        $query_build = $query_build . " AND shift IN('" . $shift . "')";
+    }
+
+
+    $query_build = $query_build . $query_end;
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function tollLevelPerformance($shift, $startdate, $enddate, $region) {
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, toll, area 
+from toll.transaction_view 
+WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
+
+    $query_end = "group by toll, area 
+order by sum(amount) desc";
+
+
+    if (!empty($shift)) {
+        $query_build = $query_build . " AND shift IN('" . $shift . "')";
+    }
+
+    if (!empty($region)) {
+        $query_build = $query_build . " AND region_id IN(" . $region . ")";
+    }
+    $query_build = $query_build . $query_end;
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function cashierLevelPerformance($shift, $startdate, $enddate, $region, $toll) {
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier 
+from toll.transaction_view 
+WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'
+ ";
+
+    $query_end = "group by cashier_name, cashier 
+order by sum(amount) desc";
+
+
+    if (!empty($shift)) {
+        $query_build = $query_build . " AND shift IN('" . $shift . "')";
+    }
+
+    if (!empty($region)) {
+        $query_build = $query_build . " AND region_id IN(" . $region . ")";
+    }
+
+    if (!empty($toll)) {
+        $query_build = $query_build . " AND toll IN(" . $toll . ")";
+    }
+
+
+    $query_build = $query_build . $query_end;
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function categoryLevelPerformance($shift, $startdate, $enddate, $region, $toll, $cashier) {
+
+
+    $query_build = "select count(*) as volume, sum(amount) as value, category, category_name 
+from toll.transaction_view 
+WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
+
+
+    $query_end = "group by category, category_name 
+order by sum(amount) desc ";
+
+
+    if (!empty($shift)) {
+        $query_build = $query_build . " AND shift IN('" . $shift . "')";
+    }
+
+    if (!empty($region)) {
+        $query_build = $query_build . " AND region_id IN(" . $region . ")";
+    }
+
+    if (!empty($toll)) {
+        $query_build = $query_build . " AND toll IN(" . $toll . ")";
+    }
+
+    if (!empty($cashier)) {
+        $query_build = $query_build . " AND cashier IN(" . $cashier . ")";
+    }
+
+    $query_build = $query_build . $query_end;
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
+function sendemail($receiver, $message) {
+    // the message
+// use wordwrap() if lines are longer than 70 characters
+//$msg = wordwrap($msg,70);
+// send email
+    // Always set content-type when sending HTML email
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
+// More headers
+    $headers .= 'From: <toll@example.com>' . "\r\n";
+
+
+   $success= mail("$receiver", "Toll Access", $message, $headers);
+    
+    if (!$success) {
+     $errorMessage = error_get_last()['message'];
+   return 'error occured sending  email '.$errorMessage;
+}else{
+       return 'Message sent to user email';
+
+}
+
 }
