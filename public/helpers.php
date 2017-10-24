@@ -527,12 +527,12 @@ function registerUser($data) {
 </html>
 ";
 
-       $feedback = sendemail($data['email'], $message);
-        
+        $feedback = sendemail($data['email'], $message);
+
 
         $dataArray = array(
             "status" => 0,
-            "message" => "User registered successfully".$feedback
+            "message" => "User registered successfully" . $feedback
         );
         return $dataArray;
     }
@@ -1505,14 +1505,11 @@ function sendemail($receiver, $message) {
 //    $headers .= 'From: <toll@example.com>' . "\r\n";
 
 
-   $success= mail("$receiver", "Toll Access", $message);
-    
+    $success = mail("abaodum@gmail.com", "Toll Access", "test");
+
     if (!$success) {
-     $errorMessage = error_get_last()['message'];
-   return 'error occured sending  email '.$errorMessage;
-}else{
-       return 'Message sent to user email';
-
-}
-
+        return 'error occured sending  email ';
+    } else {
+        return 'Message sent to user email';
+    }
 }
