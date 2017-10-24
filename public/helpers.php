@@ -155,9 +155,12 @@ function resetUserPassword($userid) {
     $result = ORM::for_table('users')->where('id', $userid)->find_one();
 
     $result->password = md5($password_new);
+    $email = $result->email; 
     $saved = $result->save();
 
     if ($saved) {
+        $message ='Your password as been reset.Your new password is '.$password_new;
+        sendemail($email, $message);
 
         $dataArray = array(
             "status" => 0,
@@ -188,10 +191,13 @@ function changePassword($code, $token) {
     $results = ORM::for_table('users')->where('id', $userid)->find_one();
 
     $results->password = md5($code);
+    $email = $results->email;
 
     $saved = $results->save();
 
     if ($saved) {
+        $message = 'Your new password is ' . $code;
+        sendemail($email, $message);
 
         $dataArray = array(
             "status" => 0,
@@ -497,7 +503,7 @@ function registerUser($data) {
         $queryset = ORM::for_table('users')->create();
 
         $queryset->name = $data['name'];
-        $queryset->password = $password;
+        $queryset->password = md5($password);
         $queryset->contact = $data['contact'];
         $queryset->role = $data['role'];
         $queryset->email = $data['email'];
@@ -1503,13 +1509,22 @@ function sendemail($receiver, $message) {
 //
 //// More headers
 //    $headers .= 'From: <toll@example.com>' . "\r\n";
+// To send HTML mail, the Content-type header must be set
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+
+// Additional headers
+//$headers[] = 'To: Mary <mary@example.com>, Kelly <kelly@example.com>';
+    $headers[] = 'From: Ghana Toll <toll@example.com>';
+//$headers[] = 'Cc: birthdayarchive@example.com';
+//$headers[] = 'Bcc: birthdaycheck@example.com';
 
 
-    $success = mail("abaodum@gmail.com", "Toll Access", "test");
+    $success = mail("$receiver", "Toll Access", $message, implode("\r\n", $headers));
 
     if (!$success) {
-        return 'error occured sending  email ';
+        return 'Email not sent ';
     } else {
-        return 'Message sent to user email';
+        return 'Email Sent';
     }
 }
