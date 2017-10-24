@@ -1498,14 +1498,14 @@ function sendemail($receiver, $message) {
 //$msg = wordwrap($msg,70);
 // send email
     // Always set content-type when sending HTML email
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+//    $headers = "MIME-Version: 1.0" . "\r\n";
+//    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+//
+//// More headers
+//    $headers .= 'From: <toll@example.com>' . "\r\n";
 
-// More headers
-    $headers .= 'From: <toll@example.com>' . "\r\n";
 
-
-   $success= mail("$receiver", "Toll Access", $message, $headers);
+   $success= mail("$receiver", "Toll Access", $message);
     
     if (!$success) {
      $errorMessage = error_get_last()['message'];
