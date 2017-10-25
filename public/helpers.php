@@ -259,6 +259,7 @@ function authenticateuser($data) {
     $result = ORM::for_table('users')->where(array(
                 'email' => $username,
                 'password' => $password,
+                'active'=>'0' 
             ))->find_one();
 
     $name = $result->name;
@@ -494,8 +495,8 @@ function registerCashier($data) {
 <p>You have been created as  Cashier on Toll application
    .Below is your use credentials .You are advised to change your password once you log into the application. </p>
 <p>
-Email : " . $data['email'] . "</br>
-Password : $unhashedpassword   </br>
+Email : " . $data['email'] . "<br/>
+Password : $unhashedpassword   <br/>
 
 <p>You can access the application <a href='http://197.253.124.186/TolApp'>here</a></p>
 </p>
