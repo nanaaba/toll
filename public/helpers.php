@@ -1157,7 +1157,7 @@ function reportforPerformingCashiersAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier_id from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by cashier_name, cashier_id 
 order by sum(amount) desc limit 10";
 
@@ -1178,7 +1178,7 @@ function reportforNonPerformingCashiersAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier_id from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE()  
 group by cashier_name, cashier_id 
 order by sum(amount) asc limit 10";
 
@@ -1199,7 +1199,7 @@ function reportforRegionPerformance() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, region_name, region_id from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by region_name, region_id 
 order by sum(amount) desc ";
 
@@ -1220,7 +1220,7 @@ function reportforShiftPerformance() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, shift from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by shift ";
 
 
@@ -1240,7 +1240,7 @@ function reportforPerformingTollsAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, area, toll from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by area, toll 
 order by sum(amount) desc limit 10";
 
@@ -1261,7 +1261,7 @@ function reportforNonPerformingTollsAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, area, toll from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by area, toll 
 order by sum(amount) asc limit 10";
 
@@ -1282,7 +1282,7 @@ function reportforCategoryPerformance() {
 
 
     $query_build = "select count(*) as volume, sum(amount) as value, category_name, category from toll.transaction_view 
-WHERE (`transactiondate` between  DATE_FORMAT(NOW() ,'%Y-01-01') AND NOW() ) 
+WHERE DATE(`transactiondate`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
 group by category_name, category 
 order by sum(amount) desc ";
 
