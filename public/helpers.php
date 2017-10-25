@@ -155,11 +155,11 @@ function resetUserPassword($userid) {
     $result = ORM::for_table('users')->where('id', $userid)->find_one();
 
     $result->password = md5($password_new);
-    $email = $result->email; 
+    $email = $result->email;
     $saved = $result->save();
 
     if ($saved) {
-        $message ="'Your password as been reset.Your new password is '.$password_new";
+        $message = "Your password as been reset.Your new password is " . $password_new;
         sendemail($email, $message);
 
         $dataArray = array(
@@ -196,7 +196,7 @@ function changePassword($code, $token) {
     $saved = $results->save();
 
     if ($saved) {
-        $message = "'Your new password is ' . $code";
+        $message = "Your new password is " . $code;
         sendemail($email, $message);
 
         $dataArray = array(
@@ -474,12 +474,43 @@ function registerTollpoint($data) {
 
 function registerCashier($data) {
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO cashiers (name, contact,username,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $data['username'] . '","' . $data['password'] . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
+    $unhashedpassword = rand_code(12);
+    $password = md5($unhashedpassword);
+
+    // return 'INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")';
+    $query = ORM::raw_execute('INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
 
     if ($query) {
+
+
+
+
+        $message = "
+<html>
+<head>
+<title>User Credentials</title>
+</head>
+<body>
+<p>You have been created as  Cashier on Toll application
+   .Below is your use credentials .You are advised to change your password once you log into the application. </p>
+<p>
+Email : " . $data['email'] . "</br>
+Password : $unhashedpassword   </br>
+
+<p>You can access the application <a href='http://197.253.124.186/TolApp'>here</a></p>
+</p>
+</body>
+</html>
+";
+
+        $feedback = sendemail($data['email'], $message);
+
+
+
+
         $dataArray = array(
             "status" => 0,
-            "message" => "Cashier registered successfully"
+            "message" => "Cashier registered successfully " . $feedback
         );
         return $dataArray;
     }
@@ -517,18 +548,14 @@ function registerUser($data) {
 <title>User Credentials</title>
 </head>
 <body>
-<p>You have been created as a user on Toll application.You have been assigned a role as " . $data['role'] . "
+<p>You have been created as  " . $data['role'] . " on Toll application
    .Below is your use credentials .You are advised to change your password once you log into the application. </p>
-<table>
-<tr>
-<th>Email</th>
-<th>Password</th>
-</tr>
-<tr>
-<td>" . $data['email'] . "</td>
-<td>" . $password . "</td>
-</tr>
-</table>
+<p>
+Email : $email</br>
+Password : $password   </br>
+
+<p>You can access the application <a href='http://197.253.124.186/TolApp'>here</a></p>
+</p>
 </body>
 </html>
 ";
@@ -1323,6 +1350,35 @@ group by MONTHNAME(transactiondate),
     return $dataArray;
 }
 
+function reportMonthly($data) {
+
+    $type = $data['type'];
+    $val = $data['value'];
+
+
+    $query_build = "select week(transactiondate) as date,sum(amount) as value 
+from toll.transaction_view 
+where
+DATE(transactiondate) BETWEEN 
+DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE())-1 DAY)
+AND CURDATE() 
+and $type = $val 
+ group by week(transactiondate)
+ order by week(transactiondate) asc ;
+ ";
+
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
+}
+
 function customPerformance($data) {
 
     $reportlevel = $data['reportlevel'];
@@ -1358,7 +1414,7 @@ function customPerformance($data) {
 
 function regionalLevelPerformance($shift, $startdate, $enddate) {
 
-    $query_build = "select count(*) as volume, sum(amount) as value, region_name, region_id 
+    $query_build = "select count(*) as volume, sum(amount) as value, region_name as description, region_id 
 from toll.transaction_view 
 WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
 
@@ -1391,7 +1447,7 @@ order by sum(amount) desc";
 function tollLevelPerformance($shift, $startdate, $enddate, $region) {
 
 
-    $query_build = "select count(*) as volume, sum(amount) as value, toll, area 
+    $query_build = "select count(*) as volume, sum(amount) as value, toll, area as description 
 from toll.transaction_view 
 WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
 
@@ -1422,7 +1478,7 @@ order by sum(amount) desc";
 function cashierLevelPerformance($shift, $startdate, $enddate, $region, $toll) {
 
 
-    $query_build = "select count(*) as volume, sum(amount) as value, cashier_name, cashier 
+    $query_build = "select count(*) as volume, sum(amount) as value, cashier_name as description, cashier 
 from toll.transaction_view 
 WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'
  ";
@@ -1460,7 +1516,7 @@ order by sum(amount) desc";
 function categoryLevelPerformance($shift, $startdate, $enddate, $region, $toll, $cashier) {
 
 
-    $query_build = "select count(*) as volume, sum(amount) as value, category, category_name 
+    $query_build = "select count(*) as volume, sum(amount) as value, category, category_name as description
 from toll.transaction_view 
 WHERE date(transactiondate) BETWEEN '$startdate' AND '$enddate'";
 
@@ -1526,5 +1582,81 @@ function sendemail($receiver, $message) {
         return 'Email not sent ';
     } else {
         return 'Email Sent';
+    }
+}
+
+function customTrendAnalysis($dataArray) {
+    $type = $dataArray['reporttype'];
+    $value = $dataArray['value'];
+    $startdate = $dataArray['startdate'];
+    $enddate = $dataArray['enddate'];
+
+    $dStart = new DateTime($startdate);
+    $dEnd = new DateTime($enddate);
+    $dDiff = $dStart->diff($dEnd);
+    $noofdays = $dDiff->days;
+   
+
+
+    if ($noofdays < 8) {
+        //do trend in days form
+
+         $query_build = "select DAYNAME(transactiondate) as date,DAY(transactiondate) as dayno, sum(amount) as value 
+from toll.transaction_view 
+where
+DATE(transactiondate) BETWEEN '$startdate' AND '$enddate'
+and $type = '$value' 
+ group by DAYNAME(transactiondate),DAY(transactiondate)
+ order by DAY(transactiondate) asc ";
+        $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+        $data = array(
+            "status" => 0,
+            "message" => "success",
+            "data" => $results
+        );
+        return $data;
+    }
+
+    if ($noofdays < 40) {
+        //do trend in weeks form
+
+        $query_build = "select week(transactiondate) as date, sum(amount) as value
+             from toll.transaction_view 
+where DATE(transactiondate) 
+BETWEEN  '$startdate' AND '$enddate'
+and $type = $value 
+group by 
+ week(transactiondate) order by week(transactiondate)";
+        
+         
+        $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+        $data = array(
+            "status" => 0,
+            "message" => "success",
+            "data" => $results
+        );
+        return $data;
+    }
+
+    if ($noofdays > 40) {
+        //do in month form
+
+        $query_build = "select MONTHNAME(transactiondate) as date, sum(amount) as value, 
+month(transactiondate) as month_no from toll.transaction_view 
+where DATE(transactiondate) 
+BETWEEN  '$startdate' AND '$enddate'
+and $type = $value 
+group by MONTHNAME(transactiondate),
+ month(transactiondate) order by month(transactiondate)";
+        $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+        $data = array(
+            "status" => 0,
+            "message" => "success",
+            "data" => $results
+        );
+        return $data;
     }
 }

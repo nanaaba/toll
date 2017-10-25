@@ -534,11 +534,28 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
                         ->write(json_encode($dataresponse));
     });
     
-    
+     $app->get('/monthlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
+
+        $dataresponse = reportMonthly($args);
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
      $app->post('/customperformance', function (Request $request, Response $response) {
         $dataArray = getRequestParsedBody($request);
 
         $dataresponse = customPerformance($dataArray);
+
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
+    
+    
+     $app->post('/customtrend', function (Request $request, Response $response) {
+        $dataArray = getRequestParsedBody($request);
+
+        $dataresponse = customTrendAnalysis($dataArray);
 
 
         return $response->withHeader('Content-Type', 'application/json')
