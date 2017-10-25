@@ -211,8 +211,9 @@ function changePassword($code, $token) {
 function getRegionCashiers($args) {
 
     $region_ids = $args['ids'];
-    $resultset = ORM::forTable()->rawQuery('SELECT cashiers.*  FROM `cashiers` left join tollpoints on cashiers.toll= tollpoints.id WHERE tollpoints.region IN (' . $region_ids . ') AND cashiers.active=0 ')->findArray();
+   // $resultset = ORM::forTable()->rawQuery('SELECT cashiers.*  FROM `cashiers` left join tollpoints on cashiers.toll= tollpoints.id WHERE tollpoints.region IN (' . $region_ids . ') AND cashiers.active=0 ')->findArray();
 
+    $resultset = ORM::forTable()->rawQuery('SELECT *  FROM `cashiers_view` WHERE region IN (' . $region_ids . ') AND active=0 ')->findArray();
 
     $dataArray = array(
         "status" => 0,
@@ -475,7 +476,7 @@ function registerTollpoint($data) {
 
 function registerCashier($data) {
 
-    $unhashedpassword = rand_code(12);
+    $unhashedpassword = str_pad(rand(6, 1000), 6, 0);
     $password = md5($unhashedpassword);
 
     // return 'INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")';
