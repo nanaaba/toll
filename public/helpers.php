@@ -1620,16 +1620,16 @@ and $type = '$value'
         return $data;
     }
 
-    if ($noofdays < 40) {
+    if ($noofdays < 32) {
         //do trend in weeks form
 
-        $query_build = "select week(transactiondate) as date, sum(amount) as value
+        $query_build = "select DAY(transactiondate) as date, sum(amount) as value
              from toll.transaction_view 
 where DATE(transactiondate) 
 BETWEEN  '$startdate' AND '$enddate'
 and $type = $value 
 group by 
- week(transactiondate) order by week(transactiondate)";
+ DAY(transactiondate) order by DAY(transactiondate)";
         
          
         $results = ORM::forTable()->rawQuery($query_build)->findArray();
@@ -1642,7 +1642,7 @@ group by
         return $data;
     }
 
-    if ($noofdays > 40) {
+    if ($noofdays > 32) {
         //do in month form
 
         $query_build = "select MONTHNAME(transactiondate) as date, sum(amount) as value, 
