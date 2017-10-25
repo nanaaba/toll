@@ -1358,15 +1358,15 @@ function reportMonthly($data) {
     $val = $data['value'];
 
 
-    $query_build = "select week(transactiondate) as date,sum(amount) as value 
+    $query_build = "select day(transactiondate) as date,sum(amount) as value 
 from toll.transaction_view 
 where
 DATE(transactiondate) BETWEEN 
 DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE())-1 DAY)
 AND CURDATE() 
 and $type = $val 
- group by week(transactiondate)
- order by week(transactiondate) asc ;
+ group by day(transactiondate)
+ order by day(transactiondate) asc ;
  ";
 
 
