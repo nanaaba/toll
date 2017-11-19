@@ -537,7 +537,7 @@ Password : $unhashedpassword   <br/>
 </body>
 </html>
 ";
-            $phonemessage = "Username :" . $data['email'] . "/n Password :" . $unhashedpassword;
+            $phonemessage = "Username :" . $data['email'] . "\n Password :" . $unhashedpassword;
 
             $feedback = sendemail($data['email'], $message);
             sendMessage($data['contact'], $phonemessage);
@@ -605,11 +605,11 @@ Password : $password   </br>
 </html>
 ";
 
-       $feedback = sendemail($data['email'], $message);
+        $feedback = sendemail($data['email'], $message);
 
-        $phonemessage = "Username :" . $email . "/n Password :" . $password;
+        $phonemessage = "Username :" . $email . "\n Password :" . $password;
 
-      $feedback=  sendMessage($data['contact'], $phonemessage);
+        $feedback = sendMessage($data['contact'], $phonemessage);
         $dataArray = array(
             "status" => 0,
             "message" => "User registered successfully" . $feedback
