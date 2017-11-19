@@ -211,7 +211,7 @@ function changePassword($code, $token) {
 function getRegionCashiers($args) {
 
     $region_ids = $args['ids'];
-   // $resultset = ORM::forTable()->rawQuery('SELECT cashiers.*  FROM `cashiers` left join tollpoints on cashiers.toll= tollpoints.id WHERE tollpoints.region IN (' . $region_ids . ') AND cashiers.active=0 ')->findArray();
+    // $resultset = ORM::forTable()->rawQuery('SELECT cashiers.*  FROM `cashiers` left join tollpoints on cashiers.toll= tollpoints.id WHERE tollpoints.region IN (' . $region_ids . ') AND cashiers.active=0 ')->findArray();
 
     $resultset = ORM::forTable()->rawQuery('SELECT *  FROM `cashiers_view` WHERE region IN (' . $region_ids . ') AND active=0 ')->findArray();
 
@@ -260,7 +260,7 @@ function authenticateuser($data) {
     $result = ORM::for_table('users')->where(array(
                 'email' => $username,
                 'password' => $password,
-                'active'=>'0' 
+                'active' => '0'
             ))->find_one();
 
     $name = $result->name;
@@ -479,15 +479,20 @@ function registerCashier($data) {
     $unhashedpassword = str_pad(rand(6, 1000), 6, 0);
     $password = md5($unhashedpassword);
 
-    // return 'INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")';
-    $query = ORM::raw_execute('INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
+    $email = $data['email'];
 
-    if ($query) {
+    $result = checkcashierexistence($email);
+
+    if ($result == 0) {
+        // return 'INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")';
+        $query = ORM::raw_execute('INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
+
+        if ($query) {
 
 
 
 
-        $message = "
+            $message = "
 <html>
 <head>
 <title>User Credentials</title>
@@ -505,21 +510,29 @@ Password : $unhashedpassword   <br/>
 </html>
 ";
 
-        $feedback = sendemail($data['email'], $message);
+            $feedback = sendemail($data['email'], $message);
 
 
 
+
+            $dataArray = array(
+                "status" => 0,
+                "message" => "Cashier registered successfully " . $feedback
+            );
+            return $dataArray;
+        }
 
         $dataArray = array(
-            "status" => 0,
-            "message" => "Cashier registered successfully " . $feedback
+            "status" => 1,
+            "message" => "Failed in registering cashier"
         );
         return $dataArray;
     }
 
+
     $dataArray = array(
         "status" => 1,
-        "message" => "Failed in registering cashier"
+        "message" => "User Email Already exist "
     );
     return $dataArray;
 }
@@ -582,7 +595,24 @@ Password : $password   </br>
 
 function checkuserexistence($email) {
 
-    $result = ORM::for_table('users')->where('email', $email)->find_one();
+    $result = ORM::for_table('users')->where(array('email' => $email,
+                'active' => 0
+            ))->find_one();
+
+
+    if (empty($result)) {
+        return '0';
+    }
+    return '1';
+}
+
+function checkcashierexistence($email) {
+
+    $result = ORM::for_table('cashiers')->where(
+                    array('email' => $email,
+                        'active' => 0
+                    )
+            )->find_one();
 
 
     if (empty($result)) {
@@ -1597,13 +1627,13 @@ function customTrendAnalysis($dataArray) {
     $dEnd = new DateTime($enddate);
     $dDiff = $dStart->diff($dEnd);
     $noofdays = $dDiff->days;
-   
+
 
 
     if ($noofdays < 8) {
         //do trend in days form
 
-         $query_build = "select DAYNAME(transactiondate) as date,DAY(transactiondate) as dayno, sum(amount) as value 
+        $query_build = "select DAYNAME(transactiondate) as date,DAY(transactiondate) as dayno, sum(amount) as value 
 from toll.transaction_view 
 where
 DATE(transactiondate) BETWEEN '$startdate' AND '$enddate'
@@ -1630,8 +1660,8 @@ BETWEEN  '$startdate' AND '$enddate'
 and $type = $value 
 group by 
  DAY(transactiondate) order by DAY(transactiondate)";
-        
-         
+
+
         $results = ORM::forTable()->rawQuery($query_build)->findArray();
 
         $data = array(
