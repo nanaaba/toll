@@ -58,7 +58,7 @@ function getTollpoints() {
 }
 
 function getUsers() {
-    $results = ORM::for_table('users')->where('active', 0)->find_array();
+    $results = ORM::for_table('users_view')->where('active', 0)->find_array();
 
     $dataArray = array(
         "status" => 0,
@@ -156,12 +156,40 @@ function resetUserPassword($userid) {
 
     $result->password = md5($password_new);
     $email = $result->email;
+    $phone = $result->contact;
+    $saved = $result->save();
+
+    if ($saved) {
+        $message = "Your password has been reset.Your new password is " . $password_new;
+        sendemail($email, $message);
+        sendMessage($phone, $message);
+        $dataArray = array(
+            "status" => 0,
+            "message" => "User Password Reseted.An email has been send to user email."
+        );
+
+        return $dataArray;
+    }
+}
+
+//resetCashierPassword
+
+
+function resetCashierPassword($cashierid) {
+
+    $password_new = rand_code(12) . str_pad($cashierid, 8, '0', STR_PAD_LEFT);
+
+    $result = ORM::for_table('cashiers')->where('id', $cashierid)->find_one();
+
+    $result->password = md5($password_new);
+    $email = $result->email;
+    $phone = $result->contact;
     $saved = $result->save();
 
     if ($saved) {
         $message = "Your password as been reset.Your new password is " . $password_new;
         sendemail($email, $message);
-
+        sendMessage($phone, $message);
         $dataArray = array(
             "status" => 0,
             "message" => "User Password Reseted.An email has been send to user email."
@@ -509,8 +537,10 @@ Password : $unhashedpassword   <br/>
 </body>
 </html>
 ";
+            $phonemessage = "Username :" . $data['email'] . "/n Password :" . $unhashedpassword;
 
             $feedback = sendemail($data['email'], $message);
+            sendMessage($data['contact'], $phonemessage);
 
 
 
@@ -575,9 +605,11 @@ Password : $password   </br>
 </html>
 ";
 
-        $feedback = sendemail($data['email'], $message);
+       // $feedback = sendemail($data['email'], $message);
 
+        $phonemessage = "Username :" . $email . "/n Password :" . $password;
 
+      $feedback=  sendMessage($data['contact'], $phonemessage);
         $dataArray = array(
             "status" => 0,
             "message" => "User registered successfully" . $feedback
@@ -895,6 +927,9 @@ function updateUserInformation($data) {
 
     $results = ORM::for_table('users')->where('id', $userid)->find_one();
 
+    if ($data['role'] == "Supervisor") {
+        $results->region = $data['region'];
+    }
     $results->name = $data['name'];
     $results->email = $data['email'];
     $results->contact = $data['contact'];
@@ -1691,4 +1726,26 @@ group by MONTHNAME(transactiondate),
         );
         return $data;
     }
+}
+
+function sendMessage($phone, $message) {
+    $contact = substr($phone, 1);
+    $sender_name = "Toll Master";
+    $sender_password = "[{Esi123}]";
+    $sender_username = "glassesTest";
+    $recipient_phone = "233" . $contact;
+
+    $host = "https://api.infobip.com/sms/1/text/single";
+
+    $process = curl_init($host);
+    curl_setopt($process, CURLOPT_HTTPHEADER, array('Content-Type: application/json',));
+    curl_setopt($process, CURLOPT_HEADER, 1);
+    curl_setopt($process, CURLOPT_USERPWD, $sender_username . ":" . $sender_password);
+    curl_setopt($process, CURLOPT_TIMEOUT, 30);
+    curl_setopt($process, CURLOPT_POST, 1);
+    curl_setopt($process, CURLOPT_POSTFIELDS, json_encode(["from" => $sender_name, "to" => $recipient_phone, "text" => $message,]));
+    curl_setopt($process, CURLOPT_RETURNTRANSFER, TRUE);
+    $return = curl_exec($process);
+    curl_close($process);
+    return $contact;
 }

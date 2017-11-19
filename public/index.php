@@ -167,36 +167,44 @@ $app->get('/api/setup', function (Request $request, Response $response) {
 $app->group('/api', function () use ($app) {
 
 
-$app->get('/reset/{id}', function (Request $request, Response $response, $args) {
+    $app->get('/reset/{id}', function (Request $request, Response $response, $args) {
         $dataresponse = resetUserPassword($args['id']);
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
     
+    
+     $app->get('/cashiers/reset/{id}', function (Request $request, Response $response, $args) {
+        $dataresponse = resetCashierPassword($args['id']);
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
+
     $app->get('/changepassword', function (Request $request, Response $response, $args) {
-     
-            $token = $request->getHeaderLine('token');
-           $code = $request->getHeaderLine('code');
-        $dataresponse = changePassword($code,$token);
+
+        $token = $request->getHeaderLine('token');
+        $code = $request->getHeaderLine('code');
+        $dataresponse = changePassword($code, $token);
 //
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     $app->get('/cashier/{id}', function (Request $request, Response $response, $args) {
         $dataresponse = getCashierInformation($args['id']);
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
+
 
     $app->post('/cashier', function (Request $request, Response $response, $args) {
         $dataArray = getRequestParsedBody($request);
@@ -453,71 +461,71 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
     $app->get('/performingcashiers', function (Request $request, Response $response) {
 
         $dataArray = reportforPerformingCashiersAcrossCountry();
-       
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
 
-     $app->get('/nonperformingcashiers', function (Request $request, Response $response) {
+    $app->get('/nonperformingcashiers', function (Request $request, Response $response) {
 
         $dataArray = reportforNonPerformingCashiersAcrossCountry();
-        
+
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-    
-     $app->get('/regionperformance', function (Request $request, Response $response) {
+
+
+    $app->get('/regionperformance', function (Request $request, Response $response) {
 
         $dataArray = reportforRegionPerformance();
-       
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-    
-    
+
+
+
     $app->get('/shiftperformance', function (Request $request, Response $response) {
 
         $dataArray = reportforShiftPerformance();
-      
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-    
-     $app->get('/performingtolls', function (Request $request, Response $response) {
+
+
+    $app->get('/performingtolls', function (Request $request, Response $response) {
 
         $dataArray = reportforPerformingTollsAcrossCountry();
-       
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-      $app->get('/nonperformingtolls', function (Request $request, Response $response) {
+
+    $app->get('/nonperformingtolls', function (Request $request, Response $response) {
 
         $dataArray = reportforNonPerformingTollsAcrossCountry();
-        
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-    
+
+
     $app->get('/categoryperformance', function (Request $request, Response $response) {
 
         $dataArray = reportforCategoryPerformance();
-        
+
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataArray));
     });
-    
-    
+
+
     $app->get('/weeklyreport/{type}/{value}', function (Request $request, Response $response, $args) {
 
         $dataresponse = reportWeekly($args);
@@ -525,23 +533,23 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-     $app->get('/yearlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
+
+    $app->get('/yearlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
 
         $dataresponse = reportyearly($args);
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-     $app->get('/monthlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
+
+    $app->get('/monthlyreport/{type}/{value}', function (Request $request, Response $response, $args) {
 
         $dataresponse = reportMonthly($args);
 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-     $app->post('/customperformance', function (Request $request, Response $response) {
+    $app->post('/customperformance', function (Request $request, Response $response) {
         $dataArray = getRequestParsedBody($request);
 
         $dataresponse = customPerformance($dataArray);
@@ -550,9 +558,9 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-    
-     $app->post('/customtrend', function (Request $request, Response $response) {
+
+
+    $app->post('/customtrend', function (Request $request, Response $response) {
         $dataArray = getRequestParsedBody($request);
 
         $dataresponse = customTrendAnalysis($dataArray);
@@ -561,8 +569,8 @@ $app->get('/reset/{id}', function (Request $request, Response $response, $args) 
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-    
+
+
 //***********************************************end report apis **************************************************
 //***********************************************begin setup apis **************************************************
 
