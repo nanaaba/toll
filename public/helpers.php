@@ -605,7 +605,7 @@ Password : $password   </br>
 </html>
 ";
 
-       // $feedback = sendemail($data['email'], $message);
+       $feedback = sendemail($data['email'], $message);
 
         $phonemessage = "Username :" . $email . "/n Password :" . $password;
 
