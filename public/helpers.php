@@ -609,7 +609,7 @@ Password : $password   </br>
 
         $phonemessage = "Username :" . $email . "\n Password :" . $password;
 
-          sendMessage($data['contact'], $phonemessage);
+       //  sendMessage($data['contact'], $phonemessage);
         $dataArray = array(
             "status" => 0,
             "message" => "User registered successfully" 
