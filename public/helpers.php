@@ -162,7 +162,7 @@ function resetUserPassword($userid) {
     if ($saved) {
         $message = "Your password has been reset.Your new password is " . $password_new;
         sendemail($email, $message);
-        sendMessage($phone, $message);
+        //sendMessage($phone, $message);
         $dataArray = array(
             "status" => 0,
             "message" => "User Password Reseted.An email has been send to user email."
@@ -189,7 +189,7 @@ function resetCashierPassword($cashierid) {
     if ($saved) {
         $message = "Your password as been reset.Your new password is " . $password_new;
         sendemail($email, $message);
-        sendMessage($phone, $message);
+      //  sendMessage($phone, $message);
         $dataArray = array(
             "status" => 0,
             "message" => "User Password Reseted.An email has been send to user email."
@@ -540,7 +540,7 @@ Password : $unhashedpassword   <br/>
             $phonemessage = "Username :" . $data['email'] . "\n Password :" . $unhashedpassword;
 
             $feedback = sendemail($data['email'], $message);
-            sendMessage($data['contact'], $phonemessage);
+           // sendMessage($data['contact'], $phonemessage);
 
 
 
