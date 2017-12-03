@@ -150,7 +150,7 @@ function checkdeviceexistence($imei) {
 
 function resetUserPassword($userid) {
 
-    $password_new = rand_code(12) . str_pad($userid, 8, '0', STR_PAD_LEFT);
+    $password_new = passwordGenerator(8);
 
     $result = ORM::for_table('users')->where('id', $userid)->find_one();
 
@@ -177,7 +177,7 @@ function resetUserPassword($userid) {
 
 function resetCashierPassword($cashierid) {
 
-    $password_new = rand_code(12) . str_pad($cashierid, 8, '0', STR_PAD_LEFT);
+    $password_new = passwordGenerator(8);
 
     $result = ORM::for_table('cashiers')->where('id', $cashierid)->find_one();
 
@@ -189,7 +189,7 @@ function resetCashierPassword($cashierid) {
     if ($saved) {
         $message = "Your password as been reset.Your new password is " . $password_new;
         sendemail($email, $message);
-      //  sendMessage($phone, $message);
+        //  sendMessage($phone, $message);
         $dataArray = array(
             "status" => 0,
             "message" => "User Password Reseted.An email has been send to user email."
@@ -504,16 +504,17 @@ function registerTollpoint($data) {
 
 function registerCashier($data) {
 
-    $unhashedpassword = str_pad(rand(6, 1000), 6, 0);
+    $unhashedpassword = passwordGenerator(8);
     $password = md5($unhashedpassword);
 
     $email = $data['email'];
+    $phone = $data['contact'];
 
-    $result = checkcashierexistence($email);
+    $result = checkcashierexistence($email, $phone);
 
     if ($result == 0) {
         // return 'INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")';
-        $query = ORM::raw_execute('INSERT IGNORE INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
+        $query = ORM::raw_execute('INSERT  INTO cashiers (name, contact,password,email,toll,addedby) VALUES ("' . $data['name'] . '","' . $data['contact'] . '","' . $password . '","' . $data['email'] . '","' . $data['toll'] . '","' . $data['addedby'] . '")');
 
         if ($query) {
 
@@ -540,7 +541,7 @@ Password : $unhashedpassword   <br/>
             $phonemessage = "Username :" . $data['email'] . "\n Password :" . $unhashedpassword;
 
             $feedback = sendemail($data['email'], $message);
-           // sendMessage($data['contact'], $phonemessage);
+            // sendMessage($data['contact'], $phonemessage);
 
 
 
@@ -562,7 +563,7 @@ Password : $unhashedpassword   <br/>
 
     $dataArray = array(
         "status" => 1,
-        "message" => "User Email Already exist "
+        "message" => "User Email or Contact Number  Already exist "
     );
     return $dataArray;
 }
@@ -572,7 +573,7 @@ function registerUser($data) {
     $email = $data['email'];
 
     $result = checkuserexistence($email);
-    $password = rand_code(12);
+    $password = passwordGenerator(8);
 
     if ($result == 0) {
 
@@ -605,14 +606,14 @@ Password : $password   </br>
 </html>
 ";
 
-          sendemail($data['email'], $message);
+        sendemail($data['email'], $message);
 
         $phonemessage = "Username :" . $email . "\n Password :" . $password;
 
-       //  sendMessage($data['contact'], $phonemessage);
+        //  sendMessage($data['contact'], $phonemessage);
         $dataArray = array(
             "status" => 0,
-            "message" => "User registered successfully" 
+            "message" => "User registered successfully"
         );
         return $dataArray;
     }
@@ -638,10 +639,11 @@ function checkuserexistence($email) {
     return '1';
 }
 
-function checkcashierexistence($email) {
+function checkcashierexistence($email, $contact) {
 
     $result = ORM::for_table('cashiers')->where(
                     array('email' => $email,
+                        'contact' => $contact,
                         'active' => 0
                     )
             )->find_one();
@@ -874,7 +876,7 @@ function fetchShiftReport($data) {
 }
 
 function getCashiersTotalCount() {
-    $results = ORM::for_table('cashiers')->count();
+    $results = ORM::for_table('cashiers')->where('active', 0)->count();
     return $results;
 }
 
@@ -884,7 +886,7 @@ function getTransactionsTotalCount() {
 }
 
 function getTollPointsTotalCount() {
-    $results = ORM::for_table('tollpoints')->count();
+    $results = ORM::for_table('tollpoints')->where('active', 0)->count();
     return $results;
 }
 
@@ -1748,4 +1750,15 @@ function sendMessage($phone, $message) {
     $return = curl_exec($process);
     curl_close($process);
     return $contact;
+}
+
+function passwordGenerator($length) {
+    $chars = "1234567890";
+    $clen = strlen($chars) - 1;
+    $id = '';
+
+    for ($i = 0; $i < $length; $i++) {
+        $id .= $chars[mt_rand(0, $clen)];
+    }
+    return ($id);
 }
