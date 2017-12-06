@@ -570,6 +570,15 @@ $app->group('/api', function () use ($app) {
                         ->write(json_encode($dataresponse));
     });
 
+    $app->post('/endofshift', function (Request $request, Response $response) {
+        $dataArray = getRequestParsedBody($request);
+
+        $dataresponse = endofShift($dataArray);
+
+
+        return $response->withHeader('Content-Type', 'application/json')
+                        ->write(json_encode($dataresponse));
+    });
 
 //***********************************************end report apis **************************************************
 //***********************************************begin setup apis **************************************************

@@ -693,6 +693,7 @@ function generalReport($data) {
     $region = $data['region'];
     $district = $data['district'];
     $toll = $data['toll'];
+    $shift = $data['shift'];
     $startdate = $data['startdate'];
     $enddate = $data['enddate'];
 
@@ -717,6 +718,11 @@ function generalReport($data) {
 
     if (!empty($toll)) {
         $query_build = $query_build . " AND toll IN(" . $toll . ")";
+    }
+
+    if (!empty($shift)) {
+
+        $query_build = $query_build . " AND shift IN('" . $shift . "')";
     }
 
 
@@ -1750,6 +1756,49 @@ function sendMessage($phone, $message) {
     $return = curl_exec($process);
     curl_close($process);
     return $contact;
+}
+
+function endofShift($data) {
+
+
+    $cashier = $data['cashier'];
+    $toll = $data['toll'];
+    $shift = $data['shift'];
+    $date = $data['date'];
+
+    if ($shift == "Evening") {
+        $timestamp = strtotime($date);
+        $startTime = date('Y-m-d H:i:s', $timestamp);
+
+
+        $enddtime = date('Y-m-d H:i:s', strtotime('+1 day +12 hour', strtotime($startTime)));
+
+
+        $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE transactiondate BETWEEN  '$startTime' AND '$enddtime' AND toll=$toll AND cashier=$cashier AND shift='Evening'";
+
+        $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+        $dataArray = array(
+            "status" => 0,
+            "query" => $query_build,
+            "message" => "success",
+            "data" => $results
+        );
+        return $dataArray;
+    }
+
+
+    $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE DATE(transactiondate) = '$date' AND toll=$toll AND cashier=$cashier AND shift='" . $shift . "'";
+
+
+    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+
+    $dataArray = array(
+        "status" => 0,
+        "message" => "success",
+        "data" => $results
+    );
+    return $dataArray;
 }
 
 function passwordGenerator($length) {
