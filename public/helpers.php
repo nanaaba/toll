@@ -1762,7 +1762,6 @@ function endofShift($data) {
 
 
     $cashier = $data['cashier'];
-    $toll = $data['toll'];
     $shift = $data['shift'];
     $date = $data['date'];
 
@@ -1774,7 +1773,7 @@ function endofShift($data) {
         $enddtime = date('Y-m-d H:i:s', strtotime('+1 day +12 hour', strtotime($startTime)));
 
 
-        $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE transactiondate BETWEEN  '$startTime' AND '$enddtime' AND toll=$toll AND cashier=$cashier AND shift='Evening'";
+        $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE transactiondate BETWEEN  '$startTime' AND '$enddtime' AND cashier=$cashier AND shift='Evening'";
 
         $results = ORM::forTable()->rawQuery($query_build)->findArray();
 
@@ -1788,7 +1787,7 @@ function endofShift($data) {
     }
 
 
-    $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE DATE(transactiondate) = '$date' AND toll=$toll AND cashier=$cashier AND shift='" . $shift . "'";
+    $query_build = "SELECT COUNT(id)AS nooftransactions,SUM(amount)AS totaltransactions FROM transactions WHERE DATE(transactiondate) = '$date'  AND cashier=$cashier AND shift='" . $shift . "'";
 
 
     $results = ORM::forTable()->rawQuery($query_build)->findArray();
