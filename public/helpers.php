@@ -862,7 +862,7 @@ function fetchShiftReport($data) {
     $enddate = $data['enddate'];
 
 
-    $query_build = "SELECT * FROM shiftwise_report WHERE shift = '$shift' AND DATE(dateadded) BETWEEN '$startdate' AND '$enddate' ";
+    $query_build = "SELECT * FROM shiftwise_report WHERE shift = '$shift' AND DATE(transactiondate) BETWEEN '$startdate' AND '$enddate' ";
 
 
     if (!empty($toll)) {
