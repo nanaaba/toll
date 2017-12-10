@@ -415,7 +415,7 @@ function saveTransactions($data) {
     }
 
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
+    $query =  ORM::forTable()->rawQuery('INSERT IGNORE INTO transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
