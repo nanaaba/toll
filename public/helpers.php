@@ -1758,12 +1758,12 @@ function sendMessage($phone, $message) {
     return $contact;
 }
 
-function endofShift($data) {
+function endofShift($cashier,$shift,$date) {
 
 
-    $cashier = $data['cashier'];
-    $shift = $data['shift'];
-    $date = $data['date'];
+//    $cashier = $data['cashier'];
+//    $shift = $data['shift'];
+//    $date = $data['date'];
 
     if ($shift == "Evening") {
         $timestamp = strtotime($date);

@@ -60,6 +60,20 @@ $app->get('/', function ( Request $request, Response $response) {
     return $response;
 });
 
+$app->get('/api/endofshift', function (Request $request, Response $response,$args) {
+    
+     $cashier = $request->getHeaderLine('userid');
+     $shift = $args['shift'];
+     $date = date('Y-m-d');
+     
+
+    $dataresponse = endofShift($cashier,$shift,$date);
+
+
+    return $response->withHeader('Content-Type', 'application/json')
+                    ->write(json_encode($dataresponse));
+});
+
 $app->post('/api/authenticate', function (Request $request, Response $response, $args) {
     $dataArray = getRequestParsedBody($request);
 
@@ -139,7 +153,7 @@ $app->get('/api/regiontolls/{ids}', function (Request $request, Response $respon
 $app->get('/api/transactions', function (Request $request, Response $response) {
     $dataresponse = getTransactions();
     return $response->withHeader('Content-Type', 'application/json')
-                    ->write(json_encode($dataresponse));
+                    ->wrfite(json_encode($dataresponse));
 });
 
 $app->get('/api/setup', function (Request $request, Response $response) {
@@ -173,9 +187,9 @@ $app->group('/api', function () use ($app) {
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-    
-    
-     $app->get('/cashiers/reset/{id}', function (Request $request, Response $response, $args) {
+
+
+    $app->get('/cashiers/reset/{id}', function (Request $request, Response $response, $args) {
         $dataresponse = resetCashierPassword($args['id']);
 
         return $response->withHeader('Content-Type', 'application/json')
@@ -573,7 +587,8 @@ $app->group('/api', function () use ($app) {
     $app->post('/endofshift', function (Request $request, Response $response) {
         $dataArray = getRequestParsedBody($request);
 
-        $dataresponse = endofShift($dataArray);
+
+        $dataresponse = endofShift($dataArray['cashier'],$dataArray['shift'],$dataArray['date']);
 
 
         return $response->withHeader('Content-Type', 'application/json')
