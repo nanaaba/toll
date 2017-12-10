@@ -408,14 +408,16 @@ function  saveTransactions($data) {
     $devicecode = $data['devicecode'];
     $transactions = $data['transactions'];
 
-    $sql = array();
+    //$sql = array();
     foreach ($transactions as $row) {
-        $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
+        $sql = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
                 . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '")';
-    }
+     
+        $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . $sql);
+        }
 
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
+//    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
