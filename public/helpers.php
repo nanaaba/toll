@@ -404,7 +404,7 @@ function getRegionDistricts($regionid) {
     return $dataArray;
 }
 
-function saveTransactions($data) {
+function  saveTransactions($data) {
     $devicecode = $data['devicecode'];
     $transactions = $data['transactions'];
 
@@ -415,7 +415,7 @@ function saveTransactions($data) {
     }
 
 
-    $query = ORM::raw_execute('INSERT  INTO transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
+    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
