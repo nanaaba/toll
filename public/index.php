@@ -63,7 +63,7 @@ $app->get('/', function ( Request $request, Response $response) {
 $app->get('/api/endofshift', function (Request $request, Response $response,$args) {
     
      $cashier = $request->getHeaderLine('userid');
-     $shift = $args['shift'];
+     $shift = $request->getHeaderLine('shift');
      $date = date('Y-m-d');
      
 

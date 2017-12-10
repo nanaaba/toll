@@ -1779,7 +1779,6 @@ function endofShift($cashier,$shift,$date) {
 
         $dataArray = array(
             "status" => 0,
-            "query" => $query_build,
             "message" => "success",
             "data" => $results
         );
