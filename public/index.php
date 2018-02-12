@@ -124,13 +124,14 @@ $app->post('/api/transactions', function (Request $request, Response $response) 
 });
 
 $app->post('/api/excesscash', function (Request $request, Response $response) {
-     $cashier = $request->getHeaderLine('userid');
+    
+    
+    $cashier = $request->getHeaderLine('userid');
      $shift = $request->getHeaderLine('shift');
-     $date = date('Y-m-d');
      
 
-    $dataArray = getRequestParsedBody($request);
-    $dataresponse = saveExcessCash($dataArray);
+   $dataArray = getRequestParsedBody($request);
+    $dataresponse = saveExcessCash($cashier,$shift,$dataArray);
 
     return $response->withHeader('Content-Type', 'application/json')
                     ->write(json_encode($dataresponse));
