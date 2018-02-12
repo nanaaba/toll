@@ -123,6 +123,19 @@ $app->post('/api/transactions', function (Request $request, Response $response) 
                     ->write(json_encode($dataresponse));
 });
 
+$app->post('/api/excesscash', function (Request $request, Response $response) {
+     $cashier = $request->getHeaderLine('userid');
+     $shift = $request->getHeaderLine('shift');
+     $date = date('Y-m-d');
+     
+
+    $dataArray = getRequestParsedBody($request);
+    $dataresponse = saveExcessCash($dataArray);
+
+    return $response->withHeader('Content-Type', 'application/json')
+                    ->write(json_encode($dataresponse));
+});
+
 $app->get('/api/districtscashiers/{ids}', function (Request $request, Response $response, $args) {
 
     $dataresponse = getRegionCashiers($args);
@@ -151,9 +164,10 @@ $app->get('/api/regiontolls/{ids}', function (Request $request, Response $respon
 
 
 $app->get('/api/transactions', function (Request $request, Response $response) {
+//
     $dataresponse = getTransactions();
     return $response->withHeader('Content-Type', 'application/json')
-                    ->wrfite(json_encode($dataresponse));
+                    ->write(json_encode($dataresponse));
 });
 
 $app->get('/api/setup', function (Request $request, Response $response) {

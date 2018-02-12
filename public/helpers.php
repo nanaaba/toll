@@ -404,18 +404,18 @@ function getRegionDistricts($regionid) {
     return $dataArray;
 }
 
-function  saveTransactions($data) {
+function saveTransactions($data) {
     $devicecode = $data['devicecode'];
     $transactions = $data['transactions'];
 
     $sql = array();
     foreach ($transactions as $row) {
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
-                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '")';
+                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","' . $row['sessionid'] . '")';
     }
 
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
+    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,session_id) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
@@ -439,6 +439,28 @@ function  saveTransactions($data) {
         );
     }
 //  print "INSERT INTO transactions VALUES  $transactions ";
+}
+
+function saveExcessCash($data) {
+    
+    $query = ORM::raw_execute('INSERT IGNORE INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,transaction_date,created_by) VALUES ("' . $data['cashier'] . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionid'] . '","' . $data['amount'] . '","' . $data['date'] . '","' . $data['addedby'] . '")');
+
+    if ($query) {
+
+
+        $dataArray = array(
+            "status" => 0,
+            "message" => "success"
+        );
+        return $dataArray;
+    } else {
+
+
+        $dataArray = array(
+            "status" => 0,
+            "message" => "Error in saving excess cash"
+        );
+    }
 }
 
 function getDevicelastCounter($devicecode) {
@@ -1758,7 +1780,7 @@ function sendMessage($phone, $message) {
     return $contact;
 }
 
-function endofShift($cashier,$shift,$date) {
+function endofShift($cashier, $shift, $date) {
 
 
 //    $cashier = $data['cashier'];
