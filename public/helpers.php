@@ -68,6 +68,7 @@ function getUsers() {
     return $dataArray;
 }
 
+
 function getTransactions() {
     $results = ORM::for_table('transaction_view')->find_array();
 
