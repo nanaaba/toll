@@ -411,12 +411,18 @@ function saveTransactions($data) {
 
     $sql = array();
     foreach ($transactions as $row) {
+        $transID = "";
+        
+        if(!isNull($row['sessionId']))
+        {
+          $transID  = $row['sessionId']; 
+        }
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
-                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '")';
+                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","'.$transID.'")';
     }
 
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift) VALUES ' . implode(',', $sql));
+    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
@@ -442,11 +448,11 @@ function saveTransactions($data) {
 //  print "INSERT INTO transactions VALUES  $transactions ";
 }
 
-function saveExcessCash($cashier,$shift,$data) {
+function saveExcessCash($cashier,$data) {
     
     
  
-    $query = ORM::raw_execute('INSERT IGNORE INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $shift . '","' . $data['sessionid'] . '","' . $data['amount'] . '","' . $data['addedby'] . '")');
+    $query = ORM::raw_execute('INSERT IGNORE INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
 
     if ($query) {
 
