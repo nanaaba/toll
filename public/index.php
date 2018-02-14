@@ -119,8 +119,8 @@ $app->post('/api/transactions', function (Request $request, Response $response) 
     $dataArray = getRequestParsedBody($request);
     $dataresponse = saveTransactions($dataArray);
 
-//    return $response->withHeader('Content-Type', 'application/json')
-//                    ->write(json_encode($dataresponse));
+    return $response->withHeader('Content-Type', 'application/json')
+                    ->write(json_encode($dataresponse));
 });
 
 $app->post('/api/excesscash', function (Request $request, Response $response) {
