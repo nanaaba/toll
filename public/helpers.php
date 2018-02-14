@@ -408,20 +408,18 @@ function getRegionDistricts($regionid) {
 function saveTransactions($data) {
     $devicecode = $data['devicecode'];
     $transactions = $data['transactions'];
-
     $sql = array();
     foreach ($transactions as $row) {
         $transID = "";
         
-        if(!isNull($row['sessionId']))
+        if(isset($row['sessionId']))
         {
           $transID  = $row['sessionId']; 
         }
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
                 . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","'.$transID.'")';
     }
-
-
+ 
     $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid) VALUES ' . implode(',', $sql));
 
     if ($query) {
