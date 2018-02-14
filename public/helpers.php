@@ -450,7 +450,7 @@ function saveExcessCash($cashier,$data) {
     
     
  
-    $query = ORM::raw_execute('INSERT IGNORE INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
+    $query = ORM::raw_execute('INSERT OR REPLACE  INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
 
     if ($query) {
 
