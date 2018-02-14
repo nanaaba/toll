@@ -68,7 +68,6 @@ function getUsers() {
     return $dataArray;
 }
 
-
 function getTransactions() {
     $results = ORM::for_table('transaction_view')->find_array();
 
@@ -411,15 +410,14 @@ function saveTransactions($data) {
     $sql = array();
     foreach ($transactions as $row) {
         $transID = "";
-        
-        if(isset($row['sessionId']))
-        {
-          $transID  = $row['sessionId']; 
+
+        if (isset($row['sessionId'])) {
+            $transID = $row['sessionId'];
         }
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
-                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","'.$transID.'")';
+                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","' . $transID . '")';
     }
- 
+
     $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid) VALUES ' . implode(',', $sql));
 
     if ($query) {
@@ -446,12 +444,14 @@ function saveTransactions($data) {
 //  print "INSERT INTO transactions VALUES  $transactions ";
 }
 
-function saveExcessCash($cashier,$data) {
-    
-    
- 
-    $query = ORM::raw_execute('INSERT OR REPLACE  INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
+function saveExcessCash($cashier, $data) {
 
+    $result = checksessionexistence($data['sessionId']);
+    if ($result == 0) {
+        $query = ORM::raw_execute('INSERT INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
+    } else {
+        $query = ORM::raw_execute('UPDATE excess_cash set amount="'.$data['amount'].'"  WHERE session_id="'.$data['sessionId'].'"');
+    }
     if ($query) {
 
 
@@ -676,6 +676,18 @@ function checkcashierexistence($email, $contact) {
                         'active' => 0
                     )
             )->find_one();
+
+
+    if (empty($result)) {
+        return '0';
+    }
+    return '1';
+}
+
+function checksessionexistence($session) {
+
+    $result = ORM::for_table('excess_cash')->where('session_id', $session)
+            ->find_one();
 
 
     if (empty($result)) {
