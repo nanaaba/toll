@@ -410,15 +410,20 @@ function saveTransactions($data) {
     $sql = array();
     foreach ($transactions as $row) {
         $transID = "";
-
+$bootNumber ="";
         if (isset($row['sessionId'])) {
             $transID = $row['sessionId'];
         }
+        
+        if (isset($row['bootNumber'])) {
+            $bootNumber = $row['bootNumber'];
+        }
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
-                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","' . $transID . '")';
-    }
+                . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","' . $transID . '","' . $bootNumber . '")';
+   
+        }
 
-    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid) VALUES ' . implode(',', $sql));
+    $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid,bootnumber) VALUES ' . implode(',', $sql));
 
     if ($query) {
 
