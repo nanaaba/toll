@@ -1286,7 +1286,7 @@ function reportforPerformingCashiersAcrossCountry() {
     $query_build = "select count(*) as volume,
 ROUND(sum(amount),2) as value,
 cashier_name, cashier_id
-from toll.transaction_view 
+from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() )
 group by cashier_name, cashier_id 
 order by sum(amount) desc limit 10";
@@ -1307,7 +1307,9 @@ function reportforNonPerformingCashiersAcrossCountry() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, cashier_name, cashier_id from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value,
+        cashier_name, cashier_id 
+        from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by cashier_name, cashier_id 
 order by sum(amount) asc limit 10";
@@ -1328,7 +1330,8 @@ function reportforRegionPerformance() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, region_name, region_id from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, region_name, 
+        region_id from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by region_name, region_id 
 order by sum(amount) desc ";
@@ -1349,7 +1352,8 @@ function reportforShiftPerformance() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, shift from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, shift from
+        transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by shift ";
 
@@ -1369,7 +1373,8 @@ function reportforPerformingTollsAcrossCountry() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll
+        from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by area, toll 
 order by sum(amount) desc limit 10";
@@ -1390,7 +1395,7 @@ function reportforNonPerformingTollsAcrossCountry() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by area, toll 
 order by sum(amount) asc limit 10";
@@ -1411,7 +1416,7 @@ function reportforCategoryPerformance() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, category_name, category from toll.transaction_view 
+    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, category_name, category from transaction_view 
 WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by category_name, category 
 order by sum(amount) desc ";
@@ -1435,7 +1440,7 @@ function reportWeekly($data) {
 
 
     $query_build = "select DAYNAME(dateadded) as date,DAY(dateadded) as dayno, ROUND(sum(amount),2) as value 
-from toll.transaction_view 
+from transaction_view 
 where
 DATE(dateadded) BETWEEN 
 DATE_ADD(CURDATE(), INTERVAL(1-DAYOFWEEK(CURDATE())) DAY)
@@ -1463,7 +1468,7 @@ function reportyearly($data) {
 
 
     $query_build = "select MONTHNAME(dateadded) as date, ROUND(sum(amount),2) as value, 
-month(dateadded) as month_no from toll.transaction_view 
+month(dateadded) as month_no from transaction_view 
 where DATE(dateadded) 
 BETWEEN DATE_FORMAT(NOW() ,'%Y-%01-01') AND CURDATE() 
 and $type = $val 
@@ -1489,7 +1494,7 @@ function reportMonthly($data) {
 
 
     $query_build = "select day(dateadded) as date,ROUND(sum(amount),2) as value 
-from toll.transaction_view 
+from transaction_view 
 where
 DATE(dateadded) BETWEEN 
 DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE())-1 DAY)
@@ -1547,7 +1552,7 @@ function customPerformance($data) {
 function regionalLevelPerformance($shift, $startdate, $enddate) {
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, region_name as description, region_id 
-from toll.transaction_view 
+from transaction_view 
 WHERE date(dateadded) BETWEEN '$startdate' AND '$enddate'";
 
     $query_end = "group by region_name, region_id 
@@ -1580,7 +1585,7 @@ function tollLevelPerformance($shift, $startdate, $enddate, $region) {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, toll, area as description 
-from toll.transaction_view 
+from transaction_view 
 WHERE date(dateadded) BETWEEN '$startdate' AND '$enddate'";
 
     $query_end = "group by toll, area 
@@ -1611,7 +1616,7 @@ function cashierLevelPerformance($shift, $startdate, $enddate, $region, $toll) {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, cashier_name as description, cashier 
-from toll.transaction_view 
+from transaction_view 
 WHERE date(dateadded) BETWEEN '$startdate' AND '$enddate'
  ";
 
@@ -1649,7 +1654,7 @@ function categoryLevelPerformance($shift, $startdate, $enddate, $region, $toll, 
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, category, category_name as description
-from toll.transaction_view 
+from transaction_view 
 WHERE date(dateadded) BETWEEN '$startdate' AND '$enddate'";
 
 
@@ -1734,7 +1739,7 @@ function customTrendAnalysis($dataArray) {
         //do trend in days form
 
         $query_build = "select DAYNAME(dateadded) as date,DAY(dateadded) as dayno, ROUND(sum(amount),2) as value 
-from toll.transaction_view 
+from transaction_view 
 where
 DATE(dateadded) BETWEEN '$startdate' AND '$enddate'
 and $type = '$value' 
@@ -1754,7 +1759,7 @@ and $type = '$value'
         //do trend in weeks form
 
         $query_build = "select DAY(dateadded) as date, ROUND(sum(amount),2) as value
-             from toll.transaction_view 
+             from transaction_view 
 where DATE(dateadded) 
 BETWEEN  '$startdate' AND '$enddate'
 and $type = $value 
@@ -1776,7 +1781,7 @@ group by
         //do in month form
 
         $query_build = "select MONTHNAME(dateadded) as date, ROUND(sum(amount),2) as value, 
-month(dateadded) as month_no from toll.transaction_view 
+month(dateadded) as month_no from transaction_view 
 where DATE(dateadded) 
 BETWEEN  '$startdate' AND '$enddate'
 and $type = $value 
