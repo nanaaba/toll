@@ -410,18 +410,17 @@ function saveTransactions($data) {
     $sql = array();
     foreach ($transactions as $row) {
         $transID = "";
-$bootNumber ="";
+        $bootNumber = "";
         if (isset($row['sessionId'])) {
             $transID = $row['sessionId'];
         }
-        
+
         if (isset($row['bootNumber'])) {
             $bootNumber = $row['bootNumber'];
         }
         $sql[] = '(' . $devicecode . ',' . $row['toll'] . ',' . $row['category'] . ',"' . $row['amount'] . '",' . $row['cashier']
                 . ',"' . $row['transactiondate'] . '",' . $row['counter'] . ',"' . $row['transactionid'] . '","' . $row['shift'] . '","' . $transID . '","' . $bootNumber . '")';
-   
-        }
+    }
 
     $query = ORM::raw_execute('INSERT IGNORE INTO  transactions (devicecode, toll,category,amount,cashier,transactiondate,counter,transactionid,shift,sessionid,bootnumber) VALUES ' . implode(',', $sql));
 
@@ -455,7 +454,7 @@ function saveExcessCash($cashier, $data) {
     if ($result == 0) {
         $query = ORM::raw_execute('INSERT INTO excess_cash (cashier_id, toll_id,shift,session_id,amount,created_by) VALUES ("' . $cashier . '","' . $data['toll'] . '","' . $data['shift'] . '","' . $data['sessionId'] . '","' . $data['amount'] . '","' . $data['addedBy'] . '")');
     } else {
-        $query = ORM::raw_execute('UPDATE excess_cash set amount="'.$data['amount'].'"  WHERE session_id="'.$data['sessionId'].'"');
+        $query = ORM::raw_execute('UPDATE excess_cash set amount="' . $data['amount'] . '"  WHERE session_id="' . $data['sessionId'] . '"');
     }
     if ($query) {
 
@@ -933,8 +932,13 @@ function getCashiersTotalCount() {
 }
 
 function getTransactionsTotalCount() {
-    $results = ORM::for_table('transactions')->count();
-    return $results;
+
+
+    $resultset = ORM::forTable()->rawQuery('select count(id) as total from transactions where month(transactiondate) = month(now())
+and year(transactiondate) = year(now())
+')->findOne();
+
+    return $resultset->total;
 }
 
 function getTollPointsTotalCount() {
@@ -943,7 +947,11 @@ function getTollPointsTotalCount() {
 }
 
 function getTotalTransactionsCost() {
-    $resultset = ORM::forTable()->rawQuery('SELECT SUM(amount) as total FROM transactions')->findOne();
+
+    $resultset = ORM::forTable()->rawQuery('select IFNULL(round(SUM(amount),2),0) as total from transactions where month(transactiondate) = month(now())
+and year(transactiondate) = year(now())
+')->findOne();
+
     return $resultset->total;
 }
 
@@ -1187,10 +1195,10 @@ function getUserToken($userid) {
 
         return $token_code;
     }
-
+    $result->userid = $userid;
     $result->token_code = rand_code(12) . str_pad($userid, 8, '0', STR_PAD_LEFT);
 
-    $result->dateexpired = date('Y-m-d H:i:s', strtotime("+5 min"));
+    $result->dateexpired = date('Y-m-d H:i:s', strtotime("+10 min"));
     $result->save();
 
     return $result->token_code;
@@ -1203,7 +1211,7 @@ function createUserToken($userid) {
     //dateexpired
     $queryset->userid = $userid;
     $queryset->token_code = rand_code(12) . str_pad($userid, 5);
-    $queryset->dateexpired = date('Y-m-d H:i:s', strtotime("+5 min"));
+    $queryset->dateexpired = date('Y-m-d H:i:s', strtotime("+10 min"));
 
     $queryset->save();
 
@@ -1275,8 +1283,11 @@ function reportforPerformingCashiersAcrossCountry() {
 
 
 
-    $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, cashier_name, cashier_id from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+    $query_build = "select count(*) as volume,
+ROUND(sum(amount),2) as value,
+cashier_name, cashier_id
+from toll.transaction_view 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() )
 group by cashier_name, cashier_id 
 order by sum(amount) desc limit 10";
 
@@ -1297,7 +1308,7 @@ function reportforNonPerformingCashiersAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, cashier_name, cashier_id from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE()  
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by cashier_name, cashier_id 
 order by sum(amount) asc limit 10";
 
@@ -1318,7 +1329,7 @@ function reportforRegionPerformance() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, region_name, region_id from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by region_name, region_id 
 order by sum(amount) desc ";
 
@@ -1339,7 +1350,7 @@ function reportforShiftPerformance() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, shift from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by shift ";
 
 
@@ -1359,7 +1370,7 @@ function reportforPerformingTollsAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by area, toll 
 order by sum(amount) desc limit 10";
 
@@ -1380,7 +1391,7 @@ function reportforNonPerformingTollsAcrossCountry() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, area, toll from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by area, toll 
 order by sum(amount) asc limit 10";
 
@@ -1401,7 +1412,7 @@ function reportforCategoryPerformance() {
 
 
     $query_build = "select count(*) as volume, ROUND(sum(amount),2) as value, category_name, category from toll.transaction_view 
-WHERE DATE(`dateadded`) between  DATE_FORMAT(NOW() ,'%Y-01-01') AND CURDATE() 
+WHERE(`dateadded` between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND NOW() ) 
 group by category_name, category 
 order by sum(amount) desc ";
 
