@@ -736,14 +736,13 @@ function generalReport($data) {
     $cashier = $data['cashier'];
     $category = $data['category'];
     $region = $data['region'];
-    $district = $data['district'];
     $toll = $data['toll'];
     $shift = $data['shift'];
     $startdate = $data['startdate'];
     $enddate = $data['enddate'];
 
 
-    $query_build = "SELECT * FROM transaction_view WHERE DATE(dateadded) BETWEEN '$startdate' AND '$enddate'";
+    $query_build = "SELECT * FROM transaction_view WHERE DATE(dateadded) BETWEEN '$startdate' AND '$enddate' ";
 
     if (!empty($cashier)) {
         $query_build = $query_build . " AND cashier IN(" . $cashier . ")";
@@ -757,10 +756,7 @@ function generalReport($data) {
         $query_build = $query_build . " AND region_id IN(" . $region . ")";
     }
 
-    if (!empty($district)) {
-        $query_build = $query_build . " AND district_id IN(" . $district . ")";
-    }
-
+    
     if (!empty($toll)) {
         $query_build = $query_build . " AND toll IN(" . $toll . ")";
     }
@@ -769,17 +765,31 @@ function generalReport($data) {
 
         $query_build = $query_build . " AND shift IN('" . $shift . "')";
     }
+    
+    
+        $query_build = $query_build . " order by dateadded desc limit 2000";
 
-
-
-    $results = ORM::forTable()->rawQuery($query_build)->findArray();
+    //echo $query_build;
+    try {
+         $results = ORM::for_table()->rawQuery($query_build)->find_array();
 
     $dataArray = array(
         "status" => 0,
         "message" => "success",
-        "data" => $results
+        "data" => $results,
+        "total_count"=>2000
+        
     );
     return $dataArray;
+    } catch (Exception $exc) {
+       $dataArray = array(
+        "status" => 1,
+        "message" => $exc->getMessage()
+        
+    );
+    }
+
+   
 }
 
 function getTransactionsPerRegion() {
@@ -907,7 +917,7 @@ function fetchShiftReport($data) {
     $enddate = $data['enddate'];
 
 
-    $query_build = "SELECT * FROM shiftwise_report WHERE shift = '$shift' AND DATE(transactiondate) BETWEEN '$startdate' AND '$enddate' ";
+    $query_build = "SELECT * FROM shiftwise_report WHERE   shift = '$shift' AND DATE(transactiondate) BETWEEN '$startdate' AND '$enddate' ";
 
 
     if (!empty($toll)) {

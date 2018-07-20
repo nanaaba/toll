@@ -93,7 +93,8 @@ $app->get('/test', function (Request $request, Response $response) {
 
     return $response->withHeader('Content-Type', 'application/json')
                     ->write(json_encode($service));
-})->add($authenticator);
+});
+      
 
 $app->get('/api/cashiers', function (Request $request, Response $response) {
 
@@ -409,6 +410,7 @@ $app->group('/api', function () use ($app) {
     $app->post('/generalreport', function (Request $request, Response $response) {
         $dataArray = getRequestParsedBody($request);
 
+       
         $dataresponse = generalReport($dataArray);
 
 
@@ -642,7 +644,7 @@ $app->group('/api', function () use ($app) {
         return $response->withHeader('Content-Type', 'application/json')
                         ->write(json_encode($dataresponse));
     });
-})->add($authenticator);
+});
 
 //***********************************************end setup apis **************************************************
 // Run app
